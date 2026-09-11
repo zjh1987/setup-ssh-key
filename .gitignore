@@ -1,0 +1,10 @@
+# 运行日志
+logs/
+*.log
+
+# 本地环境配置（若日后引入，含真实 IP/账号的配置不应提交）
+config/*.json
+
+# 系统杂项
+Thumbs.db
+.DS_Store
