@@ -148,7 +148,15 @@ try {
             Remove-Item $KeyPath, $pubPath -Force -ErrorAction SilentlyContinue
         }
         Write-Step "生成 ed25519 密钥对：$KeyPath"
-        & ssh-keygen -q -t ed25519 -N $Passphrase -C "$env:USERNAME@$env:COMPUTERNAME" -f $KeyPath
+        # 注意：Windows PowerShell 5.1 会把空字符串参数整个丢弃，若写 -N $Passphrase 且未设口令，
+        # ssh-keygen 只收到孤立的 -N，进而把 -C 当成它的值，参数全部错位报 "Too many arguments"。
+        # '""' 是 PS 5.1 传"真·空参数"的既定变通写法（已实测：生成的密钥口令为空）。
+        if ($Passphrase) {
+            & ssh-keygen -q -t ed25519 -N $Passphrase -C "$env:USERNAME@$env:COMPUTERNAME" -f $KeyPath
+        }
+        else {
+            & ssh-keygen -q -t ed25519 -N '""' -C "$env:USERNAME@$env:COMPUTERNAME" -f $KeyPath
+        }
         if ($LASTEXITCODE -ne 0) { throw "ssh-keygen 生成密钥失败" }
         Write-Ok "密钥对生成完成"
     }
